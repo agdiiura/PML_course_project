@@ -127,6 +127,17 @@ $(document).ready(function () {
 <h2>Course Project</h2>
 <div id="load-data" class="section level3">
 <h3>Load data</h3>
+<p>We load data from the directory <code>data</code>.</p>
+<pre class="r"><code>training_name = &quot;data/pml-training.csv&quot;
+testing_name = &quot;data/pml-testing.csv&quot;
+
+training = read.csv(training_name, na.strings=c(&quot;&quot;, &quot;NA&quot;))
+testing = read.csv(testing_name, na.strings=c(&quot;&quot;, &quot;NA&quot;))</code></pre>
+<p>Using the command <code>head</code> we investigate the training dataset, the output is quite long thus we do not show it here. The datasets have dimensions</p>
+<pre class="r"><code>dim(training)</code></pre>
+<pre><code>## [1] 19622   160</code></pre>
+<pre class="r"><code>dim(testing)</code></pre>
+<pre><code>## [1]  20 160</code></pre>
 </div>
 </div>
 

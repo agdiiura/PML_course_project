@@ -12,3 +12,20 @@ knitr::opts_chunk$set(echo = TRUE)
 ## Course Project
 
 ### Load data
+
+We load data from the directory `data`.
+
+```{r}
+training_name = "data/pml-training.csv"
+testing_name = "data/pml-testing.csv"
+
+training = read.csv(training_name, na.strings=c("", "NA"))
+testing = read.csv(testing_name, na.strings=c("", "NA"))
+```
+
+Using the command `head` we investigate the training dataset, the output is quite long thus we do not show it here. The datasets have dimensions 
+
+```{r}
+dim(training)
+dim(testing)
+```
