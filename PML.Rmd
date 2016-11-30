@@ -30,7 +30,7 @@ dim(training)
 dim(testing)
 ```
 
-We can reduce the number of columns in the training dataset because the first column contains the indeces. We also remove the columns with all NA values. To do this we create a mask variable called `mask_training`.
+We can reduce the number of columns in the training dataset because the first column contains the indeces. We also remove the columns with at least 60% of NA values and near zero variance variables using the function `nearZeroVar` contained in the `caret` library. To do this we create a mask variable called `mask_training`.
 
 ```{r}
 training$X = NULL
@@ -38,20 +38,36 @@ testing$X = NULL
 ```
 
 ```{r}
-mask_training = colSums(is.na(training))<nrow(training)
-training = training[,mask_training]
-testing = testing[,mask_training]
+library(caret)
+NZV = nearZeroVar(training, saveMetrics= TRUE)
+mask_training = colSums(is.na(training))<nrow(training) * 0.4 & !NZV$nzv
+
+training_small = training[,mask_training]
+testing_small = testing[,mask_training]
 ```
 
 We reduce the dimensions
 ```{r}
-dim(training)
-dim(testing)
+dim(training_small)
+dim(testing_small)
 ```
+
+The training and the validation datasets can be created using the `caret` function `createDataPartition`. For reproducability we also set seed
+
+
+```{r}
+set.seed(1234)
+inTrain =- createDataPartition(y = training_small$classe, p = 0.60, list=FALSE)
+train = training_small[inTrain,]
+valid = training_small[-inTrain,]
+```
+
 
 ## Exploratory analysis
 
-The first step is to do some exploratory analysis to explore possible correlations among the variables.
+The first step is to do some exploratory analysis to explore possible correlations among the variables. A first step is to use the package `corrplot` to see all the possible correlations in the dataset.
 
 
+```{r}
 
+```
