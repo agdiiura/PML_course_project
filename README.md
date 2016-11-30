@@ -1,2 +1,2 @@
 # PML_course_project
-## COursera Practical Machine Learning repository
+## Coursera Practical Machine Learning repository - Data Science Specialization
