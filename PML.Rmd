@@ -19,13 +19,39 @@ We load data from the directory `data`.
 training_name = "data/pml-training.csv"
 testing_name = "data/pml-testing.csv"
 
-training = read.csv(training_name, na.strings=c("", "NA"))
-testing = read.csv(testing_name, na.strings=c("", "NA"))
+training = read.csv(training_name, na.strings=c("", "NA", "#DIV/0!"))
+testing = read.csv(testing_name, na.strings=c("", "NA", "#DIV/0!"))
 ```
 
-Using the command `head` we investigate the training dataset, the output is quite long thus we do not show it here. The datasets have dimensions 
+Using the commands `head`, `str` and `summary` we investigate the training dataset, the output is quite long thus we do not show it here. The datasets have dimensions 
 
 ```{r}
 dim(training)
 dim(testing)
 ```
+
+We can reduce the number of columns in the training dataset because the first column contains the indeces. We also remove the columns with all NA values. To do this we create a mask variable called `mask_training`.
+
+```{r}
+training$X = NULL
+testing$X = NULL
+```
+
+```{r}
+mask_training = colSums(is.na(training))<nrow(training)
+training = training[,mask_training]
+testing = testing[,mask_training]
+```
+
+We reduce the dimensions
+```{r}
+dim(training)
+dim(testing)
+```
+
+## Exploratory analysis
+
+The first step is to do some exploratory analysis to explore possible correlations among the variables.
+
+
+

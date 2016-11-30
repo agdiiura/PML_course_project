@@ -131,13 +131,45 @@ $(document).ready(function () {
 <pre class="r"><code>training_name = &quot;data/pml-training.csv&quot;
 testing_name = &quot;data/pml-testing.csv&quot;
 
-training = read.csv(training_name, na.strings=c(&quot;&quot;, &quot;NA&quot;))
-testing = read.csv(testing_name, na.strings=c(&quot;&quot;, &quot;NA&quot;))</code></pre>
-<p>Using the command <code>head</code> we investigate the training dataset, the output is quite long thus we do not show it here. The datasets have dimensions</p>
+training = read.csv(training_name, na.strings=c(&quot;&quot;, &quot;NA&quot;, &quot;#DIV/0!&quot;))
+testing = read.csv(testing_name, na.strings=c(&quot;&quot;, &quot;NA&quot;, &quot;#DIV/0!&quot;))</code></pre>
+<p>Using the commands <code>head</code>, <code>str</code> and <code>summary</code> we investigate the training dataset, the output is quite long thus we do not show it here. The datasets have dimensions</p>
+<pre class="r"><code>testing['kurtosis_yaw_forearm']</code></pre>
+<pre><code>##    kurtosis_yaw_forearm
+## 1                    NA
+## 2                    NA
+## 3                    NA
+## 4                    NA
+## 5                    NA
+## 6                    NA
+## 7                    NA
+## 8                    NA
+## 9                    NA
+## 10                   NA
+## 11                   NA
+## 12                   NA
+## 13                   NA
+## 14                   NA
+## 15                   NA
+## 16                   NA
+## 17                   NA
+## 18                   NA
+## 19                   NA
+## 20                   NA</code></pre>
 <pre class="r"><code>dim(training)</code></pre>
 <pre><code>## [1] 19622   160</code></pre>
 <pre class="r"><code>dim(testing)</code></pre>
 <pre><code>## [1]  20 160</code></pre>
+<p>We can reduce the number of columns in the training dataset because the first column contains the indeces. We also remove the columns with all NA values. To do this we create a mask variable called <code>mask_training</code>.</p>
+<pre class="r"><code>training$X = NULL
+testing$X = NULL</code></pre>
+<pre class="r"><code>mask_training = colSums(is.na(training))&lt;nrow(training)
+training = training[,mask_training]
+testing = testing[,mask_training]
+dim(training)</code></pre>
+<pre><code>## [1] 19622   153</code></pre>
+<pre class="r"><code>dim(testing)</code></pre>
+<pre><code>## [1]  20 153</code></pre>
 </div>
 </div>
 
