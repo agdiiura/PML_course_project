@@ -1,7 +1,7 @@
 ---
 title: "Course Project"
 author: "Andrea Di Iura"
-date: "30 novembre 2016"
+#date: "30 novembre 2016"
 output: html_document
 ---
 
@@ -30,7 +30,7 @@ dim(training)
 dim(testing)
 ```
 
-We can reduce the number of columns in the training dataset because the first column contains the indeces. We also remove the columns with at least 60% of NA values and near zero variance variables using the function `nearZeroVar` contained in the `caret` library. To do this we create a mask variable called `mask_training`.
+We can reduce the number of columns in the training dataset because the first column contains the indeces. We also remove the columns with at least 60% of NA values and near zero variance variables using the function `nearZeroVar` contained in the `caret` library. Also the variables $1\div6$ can be neglected. To do this we create a mask variable called `mask_training`.
 
 ```{r}
 training$X = NULL
@@ -44,6 +44,9 @@ mask_training = colSums(is.na(training))<nrow(training) * 0.4 & !NZV$nzv
 
 training_small = training[,mask_training]
 testing_small = testing[,mask_training]
+
+training_small = training_small[,-c(1:6)]
+testing_small = testing_small[,-c(1:6)]
 ```
 
 We reduce the dimensions
@@ -57,17 +60,23 @@ The training and the validation datasets can be created using the `caret` functi
 
 ```{r}
 set.seed(1234)
-inTrain =- createDataPartition(y = training_small$classe, p = 0.60, list=FALSE)
+inTrain = createDataPartition(y = training_small$classe, p = 0.60, list=FALSE)
 train = training_small[inTrain,]
 valid = training_small[-inTrain,]
 ```
-
+```{r}
+dim(train)
+dim(valid)
+```
 
 ## Exploratory analysis
 
 The first step is to do some exploratory analysis to explore possible correlations among the variables. A first step is to use the package `corrplot` to see all the possible correlations in the dataset.
 
 
-```{r}
+```{r, fig.width=10, fig.height=10}
+library(corrplot)
 
+MCorr = cor(train[,-dim(train)[2]])
+corrplot(MCorr, cl.ratio=0.2, cl.align="r")
 ```
