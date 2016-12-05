@@ -23,14 +23,14 @@ training = read.csv(training_name, na.strings=c("", "NA", "#DIV/0!"))
 testing = read.csv(testing_name, na.strings=c("", "NA", "#DIV/0!"))
 ```
 
-Using the commands `head`, `str` and `summary` we investigate the training dataset, the output is quite long thus we do not show it here. The datasets have dimensions 
+Using the commands `head`, `str` and `summary` we investigate the training dataset, the output is quite long thus we do not show it here. The datasets dimensions are
 
 ```{r}
 dim(training)
 dim(testing)
 ```
 
-We can reduce the number of columns in the training dataset because the first column contains the indeces. We also remove the columns with no NA values and near zero variance variables using the function `nearZeroVar` contained in the `caret` library. Also the variables $1\div6$ can be neglected. To do this we create a mask variable called `mask_training`.
+We can reduce the number of columns in the training dataset because the first column contains the indeces. We also remove the columns with at least one NA values or columns with near zero variance variables using the function `nearZeroVar` contained in the `caret` library. Also the variables $1\div6$ can be neglected. To do this we create a mask variable called `mask_training`.
 
 ```{r}
 training$X = NULL
@@ -62,7 +62,7 @@ The training and the validation datasets can be created using the `caret` functi
 set.seed(1234)
 
 
-inTrain = createDataPartition(y = training_small$classe, p = 0.05, list=FALSE)
+inTrain = createDataPartition(y = training_small$classe, p = 0.6, list = FALSE)
 train = training_small[inTrain,]
 valid = training_small[-inTrain,]
 ```
@@ -73,7 +73,7 @@ dim(valid)
 
 ## Exploratory analysis
 
-The first step is to do some exploratory analysis to explore possible correlations among the variables. A first step is to use the package `corrplot` to see all the possible correlations in the dataset.
+A first step is to perform some exploratory analysis to show possible correlations among the variables. We use the `corrplot` package to see all the possible correlations in the dataset.
 
 
 ```{r, fig.width=10, fig.height=10}
@@ -83,7 +83,7 @@ MCorr = cor(train[,-dim(train)[2]])
 corrplot(MCorr, cl.ratio=0.2, cl.align="r")
 ```
 
-No variables with very low variance are found in `train` dataset. We could omit highly correlated variables, over correlation of 0.75
+We could omit highly correlated variables, over correlation of 0.75
 
 ```{r}
 HighCorr =  findCorrelation(MCorr, cutoff =  0.75)
@@ -93,7 +93,7 @@ valid = valid[-HighCorr]
 
 testing_small = testing_small[-HighCorr]
 ```
-Thus we can reduce the dimensions.
+Thus we can reduce the dimensions
 ```{r}
 dim(train)
 dim(valid)
@@ -101,7 +101,7 @@ dim(valid)
 
 ## Machine Learning Analysis
 
-To construct an accurate model we combine 3 different alghoritms: Supported Vector Machines (SVM), Linear Discriminant Analysis (LDA) and Random Forest (RF). With the `caret` package we evaluate the models on the `train` dataset
+To construct an accurate model we combine 4  different alghoritms: Supported Vector Machines (SVM), Linear Discriminant Analysis (LDA), Random Forest (RF) and Gradient Boosted Methods (GBM). With the `caret` package we evaluate the models on the `train` dataset
 
 ```{r}
 control_method  =  trainControl(method = 'cv', number =  5)
@@ -109,38 +109,48 @@ control_method  =  trainControl(method = 'cv', number =  5)
 mod_svm = train(classe ~ ., data = train, method = "svmLinear", trControl = control_method, verbose = FALSE)
 mod_lda = train(classe ~ ., data = train, method = "lda", verbose = FALSE)
 mod_rf = train(classe ~ ., data = train, method = "rf", trControl = control_method, verbose = FALSE)
+mod_gbm = train(classe ~ ., data = train, method = "gbm", trControl = control_method, verbose = FALSE)
 ```
-Here the confusion matrices for the models considered above using the `valid` datasets.
+The confusion matrices for the models considered above using the `valid` datasets are
 ```{r}
-print("############")
-print("SVM - method")
-print("############")
+
+cat("############\n
+SVM - method\n
+############\n")
 prediction_svm = predict(mod_svm, valid)
 confusionMatrix(prediction_svm, valid$classe)
 
-print("############")
-print("LDA - method")
-print("############")
+cat("############\n
+LDA - method\n
+############\n")
 prediction_lda = predict(mod_lda, valid)
 confusionMatrix(prediction_lda, valid$classe)
 
-print("###########")
-print("RF - method")
-print("###########")
+cat("###########\n
+RF - method\n
+###########\n")
 prediction_rf = predict(mod_rf, valid)
 confusionMatrix(prediction_rf, valid$classe)
+
+cat("############\n
+GBM - method\n
+############\n")
+prediction_gbm = predict(mod_gbm, valid)
+confusionMatrix(prediction_gbm, valid$classe)
 ```
-We can create a combined dataframe to improve our predictions. We use a Random Forest method to construct the final model. 
+We can create a combined dataframe to improve our predictions. We use a Random Forest model to construct the final model `model_combined`. 
 ```{r}
-combined_df = data.frame(prediction_svm, prediction_lda, prediction_rf, classe = valid$classe)
+combined_df = data.frame(prediction_svm, prediction_lda, prediction_rf, prediction_gbm, classe = valid$classe)
 model_combined = train(classe ~ ., method = "rf", data = combined_df, verbose = FALSE)
 ```
 
-The results of the combined fit are, where we observe a better result with respect to the Random Forest model
+The results of the combined fit are 
 ```{r}
 prediction_combined = predict(model_combined, combined_df)
 confusionMatrix(prediction_combined, combined_df$classe)
 ```
+We observe better results than the Random Forest model `model_rf`.
+
 
 
 ## Testing evaluation
@@ -151,12 +161,13 @@ We can compute the output using the `training` dataset. The prediction for `test
 prediction_svm = predict(mod_svm, testing_small)
 prediction_lda = predict(mod_lda, testing_small)
 prediction_rf = predict(mod_rf, testing_small)
+prediction_gbm = predict(mod_gbm, testing_small)
 
-testing_df = data.frame(prediction_svm, prediction_lda, prediction_rf)
+testing_df = data.frame(prediction_svm, prediction_lda, prediction_rf, prediction_gbm)
 
 testing_prediction = predict(model_combined, newdata = testing_df)
-testing_prediction
 ```
+The final outcome is suppressed from presentation in keeping with the terms of the Coursera Honor Code.
 
 The submission to Coursera can be done using the following script
 ```{r}
@@ -164,7 +175,7 @@ The submission to Coursera can be done using the following script
 pml_write_files = function(x){
   n = length(x)
   for(i in 1:n){
-    filename = paste0("problem_id_",i,".txt")
+    filename = paste0("results/problem_id_",i,".txt")
     write.table(x[i], file = filename, quote = FALSE, row.names = FALSE, col.names = FALSE)
   }
 }
@@ -172,4 +183,3 @@ pml_write_files = function(x){
 pml_write_files(testing_prediction)
 
 ```
-

@@ -35,3 +35,6 @@ vignettes/*.pdf
 
 #tmp file
 *~
+
+#results
+/results
