@@ -5,3 +5,5 @@ In this repository in the `PML.Rmd` file the analysis performed for the course p
 
 * Velloso, E.; Bulling, A.; Gellersen, H.; Ugulino, W.; Fuks, H. Qualitative Activity Recognition of Weight Lifting Exercises. Proceedings of 4th International Conference in Cooperation with SIGCHI (Augmented Human '13) . Stuttgart, Germany: ACM SIGCHI, 2013.
 
+
+The analysis is performed with `RStudio`, the code can be found in the file `PML.Rmd`. The `html` file is hosted by `RPubs` at http://rpubs.com/diyu/233266.
